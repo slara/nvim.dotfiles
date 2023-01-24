@@ -109,6 +109,11 @@ _G.packer_plugins = {
     path = "/Users/slara/.local/share/nvim/site/pack/packer/start/gitsigns.nvim",
     url = "https://github.com/lewis6991/gitsigns.nvim"
   },
+  ["gruvbox.nvim"] = {
+    loaded = true,
+    path = "/Users/slara/.local/share/nvim/site/pack/packer/start/gruvbox.nvim",
+    url = "https://github.com/ellisonleao/gruvbox.nvim"
+  },
   ["indent-blankline.nvim"] = {
     loaded = true,
     path = "/Users/slara/.local/share/nvim/site/pack/packer/start/indent-blankline.nvim",
@@ -128,6 +133,21 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/slara/.local/share/nvim/site/pack/packer/start/mason.nvim",
     url = "https://github.com/williamboman/mason.nvim"
+  },
+  ["neodev.nvim"] = {
+    loaded = true,
+    path = "/Users/slara/.local/share/nvim/site/pack/packer/start/neodev.nvim",
+    url = "https://github.com/folke/neodev.nvim"
+  },
+  ["nord.nvim"] = {
+    loaded = true,
+    path = "/Users/slara/.local/share/nvim/site/pack/packer/start/nord.nvim",
+    url = "https://github.com/shaunsingh/nord.nvim"
+  },
+  ["nordic.nvim"] = {
+    loaded = true,
+    path = "/Users/slara/.local/share/nvim/site/pack/packer/start/nordic.nvim",
+    url = "https://github.com/andersevenrud/nordic.nvim"
   },
   ["nvim-cmp"] = {
     loaded = true,
@@ -168,6 +188,11 @@ _G.packer_plugins = {
     only_cond = true,
     path = "/Users/slara/.local/share/nvim/site/pack/packer/opt/telescope-fzf-native.nvim",
     url = "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
+  },
+  ["telescope-repo.nvim"] = {
+    loaded = true,
+    path = "/Users/slara/.local/share/nvim/site/pack/packer/start/telescope-repo.nvim",
+    url = "https://github.com/cljoly/telescope-repo.nvim"
   },
   ["telescope.nvim"] = {
     loaded = true,

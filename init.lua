@@ -3,7 +3,7 @@ local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nv
 local is_bootstrap = false
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   is_bootstrap = true
-  vim.fn.execute('!git clone https://github.com/wbthomason/packer.nvim ' .. install_path)
+  vim.fn.system { 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path }
   vim.cmd [[packadd packer.nvim]]
 end
 
@@ -20,6 +20,9 @@ require('packer').startup(function(use)
 
       -- Useful status updates for LSP
       'j-hui/fidget.nvim',
+
+      -- Additional lua configuration, makes nvim stuff amazing
+      'folke/neodev.nvim',
     },
   }
 
@@ -46,6 +49,9 @@ require('packer').startup(function(use)
   use 'lewis6991/gitsigns.nvim'
 
   use 'fenetikm/falcon'
+  use 'andersevenrud/nordic.nvim'
+  use 'ellisonleao/gruvbox.nvim'
+  use 'shaunsingh/nord.nvim'
 
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
@@ -53,6 +59,7 @@ require('packer').startup(function(use)
   use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
 
   -- Fuzzy Finder (files, lsp, etc)
+  use 'cljoly/telescope-repo.nvim'
   use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
@@ -118,7 +125,18 @@ vim.wo.signcolumn = 'yes'
 
 -- Set colorscheme
 vim.o.termguicolors = true
+
+require('nordic').colorscheme({
+    underline_option = 'none',
+    italic = true,
+    italic_comments = false,
+    minimal_mode = false,
+    alternate_backgrounds = false
+})
+vim.o.background = 'dark'
 vim.cmd [[colorscheme falcon]]
+
+
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -154,7 +172,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('lualine').setup {
   options = {
     icons_enabled = false,
-    theme = 'onedark',
+    theme = 'auto',
     component_separators = '|',
     section_separators = '',
   },
@@ -185,6 +203,18 @@ require('gitsigns').setup {
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
+  extensions = {
+    repo = {
+      list = {
+        fd_opts = {
+          "--no-ignore-vcs",
+        },
+        search_dirs = {
+          "~/atreyu", "~/devel/mtsolutions"
+        },
+      },
+    },
+  },
   defaults = {
     mappings = {
       i = {
@@ -197,6 +227,7 @@ require('telescope').setup {
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
+pcall(require('telescope').load_extension, 'repo')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -219,10 +250,10 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'python', 'rust', 'typescript', 'help' },
+  ensure_installed = { 'c', 'cpp', 'go', 'python', 'rust', 'typescript', 'help', 'lua' },
 
   highlight = { enable = true },
-  indent = { enable = true },
+  indent = { enable = true, disable = { 'python'} },
   incremental_selection = {
     enable = true,
     keymaps = {
@@ -333,62 +364,52 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
--- Setup mason so it can manage external tooling
-require('mason').setup()
-
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'sumneko_lua', 'gopls' }
-
--- Ensure the servers above are installed
-require('mason-lspconfig').setup {
-  ensure_installed = servers,
-}
-
--- nvim-cmp supports additional completion capabilities
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
-for _, lsp in ipairs(servers) do
-  require('lspconfig')[lsp].setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-  }
-end
-
--- Turn on lsp status information
-require('fidget').setup()
-
--- Example custom configuration for lua
---
--- Make runtime files discoverable to the server
-local runtime_path = vim.split(package.path, ';')
-table.insert(runtime_path, 'lua/?.lua')
-table.insert(runtime_path, 'lua/?/init.lua')
-
-require('lspconfig').sumneko_lua.setup {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  settings = {
+-- local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'gopls', sumneko_lua = {
+local servers = {
+  clangd = {},
+  pyright = {},
+  rust_analyzer = {},
+  tsserver = {},
+  gopls = {},
+  sumneko_lua = {
     Lua = {
-      runtime = {
-        -- Tell the language server which version of Lua you're using (most likely LuaJIT)
-        version = 'LuaJIT',
-        -- Setup your lua path
-        path = runtime_path,
-      },
-      diagnostics = {
-        globals = { 'vim' },
-      },
-      workspace = {
-        library = vim.api.nvim_get_runtime_file('', true),
-        checkThirdParty = false
-      },
-      -- Do not send telemetry data containing a randomized but unique identifier
+      workspace = { checkThirdParty = false },
       telemetry = { enable = false },
     },
   },
 }
+
+-- Setup neovim lua configuration
+require('neodev').setup()
+--
+-- nvim-cmp supports additional completion capabilities
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+-- Setup mason so it can manage external tooling
+require('mason').setup()
+
+-- Ensure the servers above are installed
+local mason_lspconfig = require 'mason-lspconfig'
+
+mason_lspconfig.setup {
+  ensure_installed = vim.tbl_keys(servers),
+}
+
+mason_lspconfig.setup_handlers {
+  function(server_name)
+    require('lspconfig')[server_name].setup {
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = servers[server_name],
+    }
+  end,
+}
+
+-- Turn on lsp status information
+require('fidget').setup()
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
