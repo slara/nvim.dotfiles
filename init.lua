@@ -47,6 +47,7 @@ require('packer').startup(function(use)
   use 'tpope/vim-fugitive'
   use 'tpope/vim-rhubarb'
   use 'lewis6991/gitsigns.nvim'
+  use 'preservim/tagbar'
 
   use 'fenetikm/falcon'
   use 'andersevenrud/nordic.nvim'
@@ -92,7 +93,7 @@ end
 -- Automatically source and re-compile packer whenever you save this init.lua
 local packer_group = vim.api.nvim_create_augroup('Packer', { clear = true })
 vim.api.nvim_create_autocmd('BufWritePost', {
-  command = 'source <afile> | PackerCompile',
+  command = 'source <afile> | silent! LspStop | silent! LspStart | PackerCompile',
   group = packer_group,
   pattern = vim.fn.expand '$MYVIMRC',
 })
@@ -135,8 +136,6 @@ require('nordic').colorscheme({
 })
 vim.o.background = 'dark'
 vim.cmd [[colorscheme falcon]]
-
-
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -250,7 +249,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'python', 'rust', 'typescript', 'help', 'lua' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'typescript', 'help', 'vim' },
 
   highlight = { enable = true },
   indent = { enable = true, disable = { 'python'} },
@@ -356,23 +355,22 @@ local on_attach = function(_, bufnr)
 
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    if vim.lsp.buf.format then
-      vim.lsp.buf.format()
-    elseif vim.lsp.buf.formatting then
-      vim.lsp.buf.formatting()
-    end
+    vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
 end
 
 -- Enable the following language servers
 -- Feel free to add/remove any LSPs that you want here. They will automatically be installed
--- local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver', 'gopls', sumneko_lua = {
+--
+--  Add any additional override configuration in the following tables. They will be passed to
+--  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
   clangd = {},
+  gopls = {},
   pyright = {},
   rust_analyzer = {},
   tsserver = {},
-  gopls = {},
+
   sumneko_lua = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -452,6 +450,18 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
+}
+
+-- Python
+require('lspconfig').pyright.setup{
+  on_attach = on_attach,
+  settings = {
+    python = {
+      analysis = {
+        typeCheckingMode = "off"
+      }
+    }
+  }
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`

@@ -11,18 +11,12 @@ vim.keymap.set('n', '<C-d>', '<C-d>zz')
 -- Auto change dir
 vim.o.autochdir = true
 
+-- split order
+vim.o.splitright = true
+vim.o.splitbelow = true
+
 -- Relative Number
 vim.o.relativenumber = true
 
-
--- Python
-require('lspconfig').pyright.setup{
-  on_attach = on_attach,
-  settings = {
-    python = {
-      analysis = {
-        typeCheckingMode = "off"
-      }
-    }
-  }
-}
+-- Open Tagbar
+vim.keymap.set('n', '<C-t>', ':TagbarToggle<cr>')
