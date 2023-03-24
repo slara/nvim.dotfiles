@@ -208,7 +208,7 @@ require('telescope').setup {
           "--no-ignore-vcs",
         },
         search_dirs = {
-          "~/atreyu", "~/devel/mtsolutions"
+          "/home/slara/devel/mtsolutions/mtsolutions/mtcontrol-docker-build"
         },
       },
     },
@@ -225,7 +225,7 @@ require('telescope').setup {
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
-pcall(require('telescope').load_extension, 'repo')
+require('telescope').load_extension 'repo'
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -372,13 +372,6 @@ local servers = {
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
-
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  },
 }
 
 -- Setup neovim lua configuration
