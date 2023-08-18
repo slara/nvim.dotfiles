@@ -52,7 +52,12 @@ require('lazy').setup({
 
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
+    dependencies = {
+      'L3MON4D3/LuaSnip',
+      'saadparwaiz1/cmp_luasnip',
+      'hrsh7th/cmp-nvim-lsp',
+      'rafamadriz/friendly-snippets',
+    },
   },
 
   -- Useful plugin to show you pending keybinds.
@@ -87,23 +92,28 @@ require('lazy').setup({
   { 'numToStr/Comment.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
-  { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
-
-  -- Fuzzy Finder Algorithm which requires local dependencies to be built.
-  -- Only load if `make` is available. Make sure you have the system
-  -- requirements installed.
   {
-    'nvim-telescope/telescope-fzf-native.nvim',
-    -- NOTE: If you are having trouble with this installation,
-    --       refer to the README for telescope-fzf-native for more instructions.
-    build = 'make',
-    cond = function()
-      return vim.fn.executable 'make' == 1
-    end,
+    'nvim-telescope/telescope.nvim',
+    branch = '0.1.x',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      -- Fuzzy Finder Algorithm which requires local dependencies to be built.
+      -- Only load if `make` is available. Make sure you have the system
+      -- requirements installed.
+      {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        -- NOTE: If you are having trouble with this installation,
+        --       refer to the README for telescope-fzf-native for more instructions.
+        build = 'make',
+        cond = function()
+          return vim.fn.executable 'make' == 1
+        end,
+      },
+    },
   },
 
-  -- Highlight, edit, and navigate code
   {
+    -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
@@ -222,7 +232,7 @@ require('telescope').setup {
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
-require('telescope').load_extension 'repo'
+require('telescope').load_extension'repo'
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -235,6 +245,7 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
+vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
@@ -369,6 +380,8 @@ local servers = {
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
+  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -397,8 +410,9 @@ mason_lspconfig.setup_handlers {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
     }
-  end,
+  end
 }
 
 require("flutter-tools").setup{} -- use defaults
