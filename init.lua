@@ -60,7 +60,7 @@ require('lazy').setup({
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-nvim-lua',
-    },
+    }
   },
 
   -- Useful plugin to show you pending keybinds.
@@ -87,7 +87,11 @@ require('lazy').setup({
     -- See `:help indent_blankline.txt`
     main = "ibl",
     opts = {
-      indent = { char = '▏'}
+      indent = { char = '▏'},
+      scope = {
+        show_start = false,
+        show_end = false
+      }
     },
   },
 
@@ -120,6 +124,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
+      'nvim-treesitter/nvim-treesitter-context',
     },
     build = ':TSUpdate',
   },
@@ -277,6 +282,11 @@ vim.defer_fn(function()
         node_decremental = '<M-space>',
       },
     },
+    context = {
+      enable = true,
+      throttle = true,
+      separator = '-'
+    },
     textobjects = {
       select = {
         enable = true,
@@ -394,20 +404,10 @@ require('which-key').register({
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  pyright = {
-    python = {
-      analysis = {
-        typeCheckingMode = 'off',
-        autoSearchPaths = true,
-        useLibraryCodeForTypes = true,
-        diagnosticMode = 'openFilesOnly',
-      },
-    },
-  },
+  ruff_lsp = {},
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -445,10 +445,6 @@ require("flutter-tools").setup{} -- use defaults
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-require('luasnip.loaders.from_vscode').lazy_load()
-luasnip.config.setup {}
-
 cmp.setup {
   snippet = {
     expand = function(args)
@@ -462,27 +458,8 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
       select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.locally_jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+    }
   },
   sources = {
     { name = 'nvim_lsp' },
