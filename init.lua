@@ -260,6 +260,29 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]resume' })
 
+-- Function to find the git root directory
+local function find_git_root()
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  if vim.v.shell_error ~= 0 then
+    print("Not a git repository")
+    return nil
+  end
+  return git_root
+end
+
+-- Custom live_grep function to search in git root
+local function live_grep_git_root()
+  local git_root = find_git_root()
+  if git_root then
+    require('telescope.builtin').live_grep({
+      search_dirs = {git_root},
+    })
+  end
+end
+
+-- Mapping the function to a command
+vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
