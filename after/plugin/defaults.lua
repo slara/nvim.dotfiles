@@ -21,3 +21,5 @@ vim.o.relativenumber = true
 
 -- Open Tagbar
 vim.keymap.set('n', '<C-t>', ':TagbarToggle<cr>')
+
+vim.o.incsearch = true
