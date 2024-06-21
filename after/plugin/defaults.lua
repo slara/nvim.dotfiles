@@ -19,6 +19,8 @@ vim.o.splitbelow = true
 -- Relative Number
 vim.o.relativenumber = true
 
+vim.opt.showmode = false
+
 -- Open Tagbar
 vim.keymap.set('n', '<C-t>', ':TagbarToggle<cr>')
 
