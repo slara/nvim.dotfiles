@@ -24,7 +24,7 @@ return {
 	{
 	  lsp_fallback = true,
 	  async = false,
-	  timeout_ms = 1000,
+	  timeout_ms = 10000,
 	})
     end, {desc = "Format current buffer"})
   end
