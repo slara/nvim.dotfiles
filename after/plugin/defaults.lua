@@ -25,3 +25,5 @@ vim.opt.showmode = false
 vim.keymap.set('n', '<C-t>', ':TagbarToggle<cr>')
 
 vim.o.incsearch = true
+
+vim.opt.scrolloff = 8

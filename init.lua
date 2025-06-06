@@ -30,17 +30,23 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
+  'fenetikm/falcon',
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
+  --
+  --
+  --
   {
-    -- LSP Configuration & Plugins
+    'mason-org/mason.nvim',
+    dependencies = {
+      'mason-org/mason-lspconfig.nvim',
+    },
+  },
+
+  {
     'neovim/nvim-lspconfig',
     dependencies = {
-      -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim', config = true },
-      'williamboman/mason-lspconfig.nvim',
-
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
@@ -213,6 +219,8 @@ vim.o.timeoutlen = 300
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 vim.o.background = 'dark'
+vim.g.falcon_background = 0
+vim.g.falcon_inactive = 1
 vim.cmd [[colorscheme falcon]]
 
 -- [[ Basic Keymaps ]]
@@ -420,6 +428,7 @@ local on_attach = function(_, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
+
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
@@ -448,6 +457,106 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
+
+-- Mason setup
+require("mason").setup({
+  ui = {
+    border = 'rounded',
+    icons = {
+      package_installed = '✓',
+      package_pending = '➜',
+      package_uninstalled = '✗'
+    }
+  }
+})
+
+-- Mason-lspconfig setup - this bridges Mason with lspconfig
+require("mason-lspconfig").setup({
+  -- List of servers that are already installed (based on your screenshot)
+  ensure_installed = {
+    "lua_ls",                    -- lua-language-server
+    "eslint",                    -- eslint-lsp
+    "jsonls",                    -- json-lsp
+    "jedi_language_server",      -- jedi-language-server (Python)
+    "ts_ls",                     -- typescript-language-server
+  },
+  
+  -- Whether servers that are set up (via lspconfig) should be automatically installed
+  automatic_installation = false, -- Set to false since you manage them manually
+})
+
+-- Setup neovim lua configuration (keep this before the LSP setup)
+require('neodev').setup()
+
+-- nvim-cmp capabilities (keep this)
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+-- LSP server configurations matching your installed servers
+local servers = {
+  -- Lua Language Server
+  lua_ls = {
+    Lua = {
+      workspace = { checkThirdParty = false },
+      telemetry = { enable = false },
+      diagnostics = { disable = { 'missing-fields' } },
+    },
+  },
+
+  -- ESLint LSP
+  eslint = {
+    settings = {
+      workingDirectories = { mode = "auto" }
+    }
+  },
+
+  -- JSON LSP
+  jsonls = {
+    json = {
+      validate = { enable = true },
+    }
+  },
+
+  -- Jedi Language Server (Python)
+  jedi_language_server = {},
+
+  -- TypeScript Language Server (note: ts_ls is the new name for tsserver)
+  ts_ls = {
+    typescript = {
+      inlayHints = {
+        includeInlayParameterNameHints = 'all',
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+    },
+    javascript = {
+      inlayHints = {
+        includeInlayParameterNameHints = 'all',
+        includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+    }
+  },
+}
+
+-- Setup all LSP servers
+for server_name, server_config in pairs(servers) do
+  require('lspconfig')[server_name].setup {
+    capabilities = capabilities,
+    on_attach = on_attach,
+    settings = server_config.settings or server_config,
+    filetypes = server_config.filetypes,
+  }
+end
+
 -- document existing key chains
 local wk = require('which-key')
 wk.add({
@@ -468,33 +577,6 @@ wk.add({
 })
 
 
--- mason-lspconfig requires that these setup functions are called in this order
--- before setting up the servers.
-require('mason').setup()
-require('mason-lspconfig').setup()
-
--- Enable the following language servers
--- Feel free to add/remove any LSPs that you want here. They will automatically be installed
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
-local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-  ruff = {},
-  jedi_language_server = {},
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  },
-}
-
 -- Setup neovim lua configuration
 require('neodev').setup()
 
@@ -502,25 +584,6 @@ require('neodev').setup()
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
--- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
-
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
-
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end
-}
-
-require("flutter-tools").setup{} -- use defaults
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
