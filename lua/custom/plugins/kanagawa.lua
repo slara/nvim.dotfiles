@@ -17,6 +17,6 @@ return {
 				sidebars = { dark = 'dragon' },
 			},
 		})
-		vim.cmd.colorscheme('kanagawa')
+		-- vim.cmd.colorscheme('kanagawa')
 	end,
 }

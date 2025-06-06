@@ -32,5 +32,8 @@
         "/home/slara/.local/share/nvim/lazy/neo-tree.nvim/lua",
         "/home/slara/.config/nvim/lua",
         "${3rd}/luv/library"
+    ],
+    "diagnostics.globals": [
+        "vim"
     ]
 }
