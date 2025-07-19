@@ -10,6 +10,12 @@ vim.wo.number = true
 -- Enable mouse mode
 vim.o.mouse = 'a'
 
+-- Enable mouse focus to allow window resizing with mouse
+vim.o.mousefocus = true
+
+-- Better mouse support in terminal
+vim.o.mousemodel = 'extend'
+
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`

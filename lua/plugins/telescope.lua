@@ -58,7 +58,8 @@ return {
                 "--no-ignore-vcs",
               },
               search_dirs = {
-                "/home/slara/docker"
+                "/home/slara/docker",
+                "/Users/slara/docker"
               },
             },
           },
