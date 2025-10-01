@@ -4,8 +4,35 @@ return {
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      'mason-org/mason.nvim',
-      'mason-org/mason-lspconfig.nvim',
+      {
+        'mason-org/mason.nvim',
+        opts = {
+          ui = {
+            border = 'rounded',
+            icons = {
+              package_installed = '✓',
+              package_pending = '➜',
+              package_uninstalled = '✗'
+            }
+          }
+        }
+      },
+      {
+        'mason-org/mason-lspconfig.nvim',
+        opts = {
+          ensure_installed = {
+            "lua_ls",
+            "eslint",
+            "jsonls",
+            "jedi_language_server",
+            "ts_ls",
+            "volar",
+          },
+          automatic_installation = false,
+          -- Disable automatic server setup to prevent conflicts
+          automatic_setup = false,
+        }
+      },
 
       -- Useful status updates for LSP
       { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
@@ -58,37 +85,15 @@ return {
         end, { desc = 'Format current buffer with LSP' })
       end
 
-      -- Mason setup
-      require("mason").setup({
-        ui = {
-          border = 'rounded',
-          icons = {
-            package_installed = '✓',
-            package_pending = '➜',
-            package_uninstalled = '✗'
-          }
-        }
-      })
-
-      -- Mason-lspconfig setup
-      require("mason-lspconfig").setup({
-        ensure_installed = {
-          "lua_ls",
-          "eslint",
-          "jsonls",
-          "jedi_language_server",
-          "ts_ls",
-        },
-        automatic_installation = false,
-      })
-
-      -- LSP server configurations
+      -- LSP server configurations for Neovim 0.11+
       local servers = {
         lua_ls = {
-          Lua = {
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-            diagnostics = { disable = { 'missing-fields' } },
+          settings = {
+            Lua = {
+              workspace = { checkThirdParty = false },
+              telemetry = { enable = false },
+              diagnostics = { disable = { 'missing-fields' } },
+            },
           },
         },
         eslint = {
@@ -97,45 +102,71 @@ return {
           }
         },
         jsonls = {
-          json = {
-            validate = { enable = true },
+          settings = {
+            json = {
+              validate = { enable = true },
+            }
           }
         },
         jedi_language_server = {},
         ts_ls = {
-          typescript = {
-            inlayHints = {
-              includeInlayParameterNameHints = 'all',
-              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-              includeInlayFunctionParameterTypeHints = true,
-              includeInlayVariableTypeHints = true,
-              includeInlayPropertyDeclarationTypeHints = true,
-              includeInlayFunctionLikeReturnTypeHints = true,
-              includeInlayEnumMemberValueHints = true,
+          filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" },
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'all',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              }
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'all',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              }
             }
+          }
+        },
+        volar = {
+          init_options = {
+            vue = {
+              hybridMode = false,
+            },
           },
-          javascript = {
-            inlayHints = {
-              includeInlayParameterNameHints = 'all',
-              includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-              includeInlayFunctionParameterTypeHints = true,
-              includeInlayVariableTypeHints = true,
-              includeInlayPropertyDeclarationTypeHints = true,
-              includeInlayFunctionLikeReturnTypeHints = true,
-              includeInlayEnumMemberValueHints = true,
+          settings = {
+            vue = {
+              updateImportsOnFileMove = {
+                enabled = false,  -- Disable to prevent global types issues
+              },
+              suggest = {
+                autoImports = false,  -- Disable auto imports for Vue 2
+              },
+              complete = {
+                casing = {
+                  tags = "kebab",
+                  props = "camel"
+                }
+              }
             }
           }
         },
       }
 
-      -- Setup all LSP servers
+      -- Setup all LSP servers with automatic setup for mason-installed servers
       for server_name, server_config in pairs(servers) do
-        require('lspconfig')[server_name].setup {
+        require('lspconfig')[server_name].setup(vim.tbl_deep_extend('force', {
           capabilities = capabilities,
           on_attach = on_attach,
-          settings = server_config.settings or server_config,
-          filetypes = server_config.filetypes,
-        }
+        }, server_config))
       end
 
       -- Setup which-key groups

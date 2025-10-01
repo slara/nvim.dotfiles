@@ -4,13 +4,15 @@ return {
   
   -- Colorscheme
   {
-    'fenetikm/falcon',
+    'shaunsingh/nord.nvim',
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'falcon'
+      vim.cmd.colorscheme 'nord'
     end,
     lazy = false,
   },
+
+
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
