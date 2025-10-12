@@ -9,9 +9,9 @@ return {
       'rafamadriz/friendly-snippets',
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
-      'hrsh7th/cmp-nvim-lua',
       'zbirenbaum/copilot-cmp',
       'onsails/lspkind.nvim',
+      { 'folke/lazydev.nvim', ft = 'lua' }, -- for lazydev completion
     },
     config = function()
       local cmp = require 'cmp'
@@ -45,6 +45,7 @@ return {
             vim_item.menu = ({
               copilot = "[Copilot]",
               nvim_lsp = "[LSP]",
+              lazydev = "[LazyDev]",
               luasnip = "[Snippet]",
               buffer = "[Buffer]",
               path = "[Path]",
@@ -65,6 +66,7 @@ return {
           }
         },
         sources = {
+          { name = 'lazydev', group_index = 0 }, -- set group index to 0 to skip loading LuaLS completions
           { name = 'copilot' },
           { name = 'nvim_lsp' },
           { name = 'path'},

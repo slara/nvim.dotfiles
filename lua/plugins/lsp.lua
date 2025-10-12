@@ -1,91 +1,81 @@
--- LSP Configuration & Plugins
+-- Mason for LSP server management
 return {
   {
-    'neovim/nvim-lspconfig',
+    'mason-org/mason.nvim',
     dependencies = {
-      -- Automatically install LSPs to stdpath for neovim
-      {
-        'mason-org/mason.nvim',
-        opts = {
-          ui = {
-            border = 'rounded',
-            icons = {
-              package_installed = '✓',
-              package_pending = '➜',
-              package_uninstalled = '✗'
-            }
-          }
-        }
-      },
-      {
-        'mason-org/mason-lspconfig.nvim',
-        opts = {
-          ensure_installed = {
-            "lua_ls",
-            "eslint",
-            "jsonls",
-            "jedi_language_server",
-            "ts_ls",
-            "volar",
-          },
-          automatic_installation = false,
-          -- Disable automatic server setup to prevent conflicts
-          automatic_setup = false,
-        }
-      },
-
-      -- Useful status updates for LSP
+      'neovim/nvim-lspconfig', -- Provides server definitions
+      'mason-org/mason-lspconfig.nvim',
       { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
-
-      -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
+      {
+        'folke/lazydev.nvim',
+        ft = 'lua',
+        opts = {
+          library = {
+            { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+          },
+        },
+      },
+      { 'Bilal2453/luvit-meta', lazy = true },
     },
     config = function()
-      -- Setup neovim lua configuration
-      require('neodev').setup()
+      require('mason').setup({
+        ui = {
+          border = 'rounded',
+          icons = {
+            package_installed = '✓',
+            package_pending = '➜',
+            package_uninstalled = '✗'
+          }
+        }
+      })
 
-      -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+      require('mason-lspconfig').setup({
+        ensure_installed = {
+          "lua_ls",
+          "eslint",
+          "jsonls",
+          "jedi_language_server",
+          "ts_ls",
+          "vue_ls"
+        },
+      })
+
+      -- Get capabilities for LSP
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
-      -- LSP on_attach function
-      local on_attach = function(_, bufnr)
-        local nmap = function(keys, func, desc)
-          if desc then
-            desc = 'LSP: ' .. desc
+      -- Setup keymaps on LSP attach
+      vim.api.nvim_create_autocmd('LspAttach', {
+        group = vim.api.nvim_create_augroup('lsp-attach', { clear = true }),
+        callback = function(event)
+          local map = function(keys, func, desc)
+            vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
-          vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-        end
 
-        nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-        nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('K', vim.lsp.buf.hover, 'Hover Documentation')
+          map('<C-s>', vim.lsp.buf.signature_help, 'Signature Documentation')
+          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+          map('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+          map('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+          map('<leader>wl', function()
+            print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+          end, '[W]orkspace [L]ist Folders')
 
-        nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-        nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-        nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-        nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-        nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-        nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          vim.api.nvim_buf_create_user_command(event.buf, 'Format', function(_)
+            vim.lsp.buf.format()
+          end, { desc = 'Format current buffer with LSP' })
+        end,
+      })
 
-        -- See `:help K` for why this keymap
-        nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-        nmap('<C-s>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-        -- Lesser used LSP functionality
-        nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-        nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-        nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-        nmap('<leader>wl', function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, '[W]orkspace [L]ist Folders')
-
-        -- Create a command `:Format` local to the LSP buffer
-        vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-          vim.lsp.buf.format()
-        end, { desc = 'Format current buffer with LSP' })
-      end
-
-      -- LSP server configurations for Neovim 0.11+
+      -- Configure LSP servers
       local servers = {
         lua_ls = {
           settings = {
@@ -101,72 +91,18 @@ return {
             workingDirectories = { mode = "auto" }
           }
         },
-        jsonls = {
-          settings = {
-            json = {
-              validate = { enable = true },
-            }
-          }
-        },
+        jsonls = {},
         jedi_language_server = {},
         ts_ls = {
           filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" },
-          settings = {
-            typescript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              }
-            },
-            javascript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              }
-            }
-          }
-        },
-        volar = {
-          init_options = {
-            vue = {
-              hybridMode = false,
-            },
-          },
-          settings = {
-            vue = {
-              updateImportsOnFileMove = {
-                enabled = false,  -- Disable to prevent global types issues
-              },
-              suggest = {
-                autoImports = false,  -- Disable auto imports for Vue 2
-              },
-              complete = {
-                casing = {
-                  tags = "kebab",
-                  props = "camel"
-                }
-              }
-            }
-          }
         },
       }
 
-      -- Setup all LSP servers with automatic setup for mason-installed servers
-      for server_name, server_config in pairs(servers) do
-        require('lspconfig')[server_name].setup(vim.tbl_deep_extend('force', {
-          capabilities = capabilities,
-          on_attach = on_attach,
-        }, server_config))
+      -- Setup each server
+      for server_name, config in pairs(servers) do
+        config.capabilities = capabilities
+        vim.lsp.config(server_name, config)
+        vim.lsp.enable(server_name)
       end
 
       -- Setup which-key groups
