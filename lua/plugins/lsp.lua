@@ -1,10 +1,10 @@
 -- Mason for LSP server management
 return {
   {
-    'mason-org/mason.nvim',
+    'neovim/nvim-lspconfig',
     dependencies = {
-      'neovim/nvim-lspconfig', -- Provides server definitions
-      'mason-org/mason-lspconfig.nvim',
+      'mason-org/mason.nvim',
+      'williamboman/mason-lspconfig.nvim',
       { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
       {
         'folke/lazydev.nvim',
@@ -18,6 +18,17 @@ return {
       { 'Bilal2453/luvit-meta', lazy = true },
     },
     config = function()
+      -- Completely suppress lspconfig deprecation by overriding vim.deprecate
+      local original_deprecate = vim.deprecate
+      ---@diagnostic disable-next-line: duplicate-set-field
+      vim.deprecate = function(name, alternative, version, plugin, backtrace)
+        -- Skip lspconfig framework deprecation warning
+        if name and name:find('lspconfig', 1, true) then
+          return
+        end
+        return original_deprecate(name, alternative, version, plugin, backtrace)
+      end
+      
       require('mason').setup({
         ui = {
           border = 'rounded',
@@ -36,9 +47,28 @@ return {
           "jsonls",
           "jedi_language_server",
           "ts_ls",
-          "vue_ls"
         },
       })
+
+      -- Configure diagnostics display
+      vim.diagnostic.config({
+        virtual_text = true,
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        float = {
+          border = 'rounded',
+          source = 'always',
+        },
+      })
+
+      -- Define diagnostic signs
+      local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+      for type, icon in pairs(signs) do
+        local hl = "DiagnosticSign" .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+      end
 
       -- Get capabilities for LSP
       local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -68,12 +98,21 @@ return {
           map('<leader>wl', function()
             print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
           end, '[W]orkspace [L]ist Folders')
+          
+          -- Diagnostic keymaps
+          map('[d', vim.diagnostic.goto_prev, 'Go to previous [D]iagnostic message')
+          map(']d', vim.diagnostic.goto_next, 'Go to next [D]iagnostic message')
+          map('<leader>e', vim.diagnostic.open_float, 'Show diagnostic [E]rror messages')
+          map('<leader>q', vim.diagnostic.setloclist, 'Open diagnostic [Q]uickfix list')
 
           vim.api.nvim_buf_create_user_command(event.buf, 'Format', function(_)
             vim.lsp.buf.format()
           end, { desc = 'Format current buffer with LSP' })
         end,
       })
+
+      -- Get lspconfig (deprecation suppressed above, don't restore vim.deprecate)
+      local lspconfig = require('lspconfig')
 
       -- Configure LSP servers
       local servers = {
@@ -82,7 +121,10 @@ return {
             Lua = {
               workspace = { checkThirdParty = false },
               telemetry = { enable = false },
-              diagnostics = { disable = { 'missing-fields' } },
+              diagnostics = { 
+                disable = { 'missing-fields' },
+                globals = { 'vim' },
+              },
             },
           },
         },
@@ -93,16 +135,13 @@ return {
         },
         jsonls = {},
         jedi_language_server = {},
-        ts_ls = {
-          filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue" },
-        },
+        ts_ls = {},
       }
 
       -- Setup each server
       for server_name, config in pairs(servers) do
         config.capabilities = capabilities
-        vim.lsp.config(server_name, config)
-        vim.lsp.enable(server_name)
+        lspconfig[server_name].setup(config)
       end
 
       -- Setup which-key groups
