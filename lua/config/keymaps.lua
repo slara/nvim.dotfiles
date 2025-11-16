@@ -25,3 +25,9 @@ vim.keymap.set({'n', 'v'}, '<leader>y', '"+y', { desc = 'Yank to system clipboar
 vim.keymap.set('n', '<leader>Y', '"+Y', { desc = 'Yank line to system clipboard' })
 vim.keymap.set({'n', 'v'}, '<leader>p', '"+p', { desc = 'Paste from system clipboard' })
 vim.keymap.set({'n', 'v'}, '<leader>P', '"+P', { desc = 'Paste before from system clipboard' })
+
+-- Window/split navigation with Ctrl+hjkl
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Move to left split' })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Move to split below' })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Move to split above' })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Move to right split' })

@@ -44,4 +44,4 @@ vim.o.background = 'dark'
 
 -- Falcon colorscheme settings (colorscheme will be set by plugin)
 vim.g.falcon_background = 0
-vim.g.falcon_inactive = 1
+vim.g.falcon_inactive = 0

@@ -28,7 +28,7 @@ return {
         end
         return original_deprecate(name, alternative, version, plugin, backtrace)
       end
-      
+
       require('mason').setup({
         ui = {
           border = 'rounded',
