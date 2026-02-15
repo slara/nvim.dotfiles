@@ -1,25 +1,5 @@
 return {
   {
-    'aserowy/tmux.nvim',
-    config = function()
-      require('tmux').setup({
-        copy_sync = {
-          enable = false,
-        },
-        navigation = {
-          enable_default_keybindings = true,
-          persist_zoom = false,
-          cycle_navigation = true,
-        },
-        resize = {
-          enable_default_keybindings = true,
-          resize_step_x = 1,
-          resize_step_y = 1,
-        },
-      })
-    end,
-  },
-  {
     'christoomey/vim-tmux-navigator',
     lazy = false,
     cmd = {
@@ -36,9 +16,5 @@ return {
       { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
       { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
-  },
-  {
-    'roxma/vim-tmux-clipboard',
-    lazy = false,
   },
 }

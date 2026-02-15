@@ -1,4 +1,3 @@
--- Suppress lspconfig deprecation warning globally
 -- Load core configuration
 require('config.options')
 require('config.keymaps')

@@ -45,3 +45,19 @@ vim.o.background = 'dark'
 -- Falcon colorscheme settings (colorscheme will be set by plugin)
 vim.g.falcon_background = 0
 vim.g.falcon_inactive = 0
+
+-- Split behavior
+vim.o.splitright = true
+vim.o.splitbelow = true
+
+-- Relative line numbers
+vim.o.relativenumber = true
+
+-- Don't show mode in cmdline (lualine shows it)
+vim.opt.showmode = false
+
+-- Incremental search
+vim.o.incsearch = true
+
+-- Keep lines visible above/below cursor
+vim.opt.scrolloff = 8
