@@ -1,0 +1,21 @@
+{
+  "Claude Prompt Template": {
+    "prefix": ["prompt", "claude-prompt"],
+    "body": [
+      "## Task",
+      "${1:[One sentence: what to build]}",
+      "",
+      "## Context",
+      "- Source: ${2:[files/APIs involved]}",
+      "- Target: ${3:[where it goes]}",
+      "- Stack: ${4:[if relevant]}",
+      "",
+      "## Requirements",
+      "${5:[Bullet the must-haves, grouped logically]}",
+      "",
+      "## Constraints",
+      "${6:[Technical limits, style guides, what to avoid]}"
+    ],
+    "description": "Claude Code prompt template"
+  }
+}
