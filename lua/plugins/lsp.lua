@@ -17,14 +17,6 @@ return {
       { 'Bilal2453/luvit-meta', lazy = true },
     },
     config = function()
-      -- Suppress lspconfig deprecation warning (triggered by tailwind-tools.nvim)
-      local original_deprecate = vim.deprecate
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.deprecate = function(name, ...)
-        if name and name:find('lspconfig', 1, true) then return end
-        return original_deprecate(name, ...)
-      end
-
       require('mason').setup({
         ui = {
           border = 'rounded',
@@ -37,6 +29,7 @@ return {
       })
 
       require('mason-lspconfig').setup({
+        automatic_enable = false,
         ensure_installed = {
           "lua_ls",
           "eslint",
@@ -66,6 +59,7 @@ return {
 
       vim.lsp.config('eslint', {
         capabilities = capabilities,
+        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte', 'astro', 'htmlangular' },
         settings = {
           workingDirectories = { mode = "auto" }
         },
@@ -73,10 +67,36 @@ return {
 
       vim.lsp.config('jsonls', { capabilities = capabilities })
       vim.lsp.config('jedi_language_server', { capabilities = capabilities })
-      vim.lsp.config('ts_ls', { capabilities = capabilities })
+
+      -- Vue LS v3 requires ts_ls to load @vue/typescript-plugin and attach to .vue files
+      local vue_language_server_path = vim.fn.stdpath('data')
+        .. '/mason/packages/vue-language-server/node_modules/@vue/language-server'
+
+      vim.lsp.config('ts_ls', {
+        capabilities = capabilities,
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vue_language_server_path,
+              languages = { 'vue' },
+            },
+          },
+        },
+        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+      })
+
+      vim.lsp.config('tailwindcss', {
+        capabilities = capabilities,
+        filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+      })
+
+      vim.lsp.config('vue_ls', {
+        capabilities = capabilities,
+      })
 
       -- Enable all configured servers
-      vim.lsp.enable({ 'lua_ls', 'eslint', 'jsonls', 'jedi_language_server', 'ts_ls' })
+      vim.lsp.enable({ 'lua_ls', 'eslint', 'jsonls', 'jedi_language_server', 'ts_ls', 'tailwindcss', 'vue_ls' })
 
       -- Setup keymaps on LSP attach
       vim.api.nvim_create_autocmd('LspAttach', {
