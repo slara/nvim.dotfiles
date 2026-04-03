@@ -1,21 +1,117 @@
 {
-  "Claude Prompt Template": {
-    "prefix": ["prompt", "claude-prompt"],
+  "Spec-Driven Development": {
+    "prefix": ["spec", "claude-spec"],
     "body": [
-      "## Task",
-      "${1:[One sentence: what to build]}",
+      "**Context:**",
+      "${1:[project context, current state, why this is needed]}",
       "",
-      "## Context",
-      "- Source: ${2:[files/APIs involved]}",
-      "- Target: ${3:[where it goes]}",
-      "- Stack: ${4:[if relevant]}",
+      "**Codebase:**",
+      "${2:[key files/modules to read first, entry points, relevant paths]}",
       "",
-      "## Requirements",
-      "${5:[Bullet the must-haves, grouped logically]}",
+      "**Objective:**",
+      "${3:[what to build — clear, single-purpose goal]}",
       "",
-      "## Constraints",
-      "${6:[Technical limits, style guides, what to avoid]}"
+      "**Requirements:**",
+      "* ${4:[functional requirements, business rules, behavior specs]}",
+      "",
+      "**Technical Approach:**",
+      "${5:[architecture, patterns to follow, integration points]}",
+      "",
+      "**Acceptance Criteria:**",
+      "- [ ] ${6:[testable condition that proves the feature works]}",
+      "",
+      "**Constraints:**",
+      "${7:[what NOT to change, performance budgets, compatibility rules]}"
     ],
-    "description": "Claude Code prompt template"
+    "description": "Spec-driven development — detailed features"
+  },
+  "Bug Fix": {
+    "prefix": ["bugfix", "claude-bugfix"],
+    "body": [
+      "**Bug:**",
+      "${1:[one-line description of the bug]}",
+      "",
+      "**Severity:** ${2|critical,high,medium,low|}",
+      "",
+      "**Expected Behavior:**",
+      "${3:[what should happen]}",
+      "",
+      "**Actual Behavior:**",
+      "${4:[what happens instead]}",
+      "",
+      "**Reproduction:**",
+      "${5:[steps to reproduce, or conditions that trigger the bug]}",
+      "",
+      "**Relevant Code:**",
+      "${6:[file paths, functions, modules involved]}",
+      "",
+      "**Fix Constraints:**",
+      "${7:[what not to change, regression risks, backward compatibility needs]}"
+    ],
+    "description": "Bug fix prompt — structured diagnosis and fix"
+  },
+  "Refactor": {
+    "prefix": ["refactor", "claude-refactor"],
+    "body": [
+      "**Scope:**",
+      "${1:[files, modules, or functions to refactor]}",
+      "",
+      "**Goal:**",
+      "${2:[why refactor — performance, readability, maintainability]}",
+      "",
+      "**Current State:**",
+      "${3:[what the code does now, pain points, tech debt]}",
+      "",
+      "**Desired Outcome:**",
+      "${4:[target architecture, patterns, structure after refactor]}",
+      "",
+      "**Rules:**",
+      "* ${5:[what NOT to change, public API stability, behavior preservation]}",
+      "* ${6:[additional constraints, testing requirements]}"
+    ],
+    "description": "Refactor prompt — scoped restructuring"
+  },
+  "Code Review": {
+    "prefix": ["review", "claude-review"],
+    "body": [
+      "**Review target:**",
+      "${1:[files, PR, diff, or branch to review]}",
+      "",
+      "**Focus Areas:**",
+      "${2:[correctness, performance, security, readability, architecture]}",
+      "",
+      "**Context:**",
+      "${3:[why this code exists, what it integrates with]}",
+      "",
+      "**Standards:**",
+      "${4:[coding conventions, patterns to enforce, anti-patterns to flag]}"
+    ],
+    "description": "Code review prompt — focused review"
+  },
+  "API / Integration": {
+    "prefix": ["api", "claude-api"],
+    "body": [
+      "**Integration:**",
+      "${1:[service/API name, purpose of the integration]}",
+      "",
+      "**Endpoints:**",
+      "${2:[routes, methods, URLs]}",
+      "",
+      "**Input Contract:**",
+      "${3:[request shape, params, headers, body schema]}",
+      "",
+      "**Output Contract:**",
+      "${4:[response shape, status codes, data format]}",
+      "",
+      "**Error Handling:**",
+      "${5:[failure modes, retry logic, fallback behavior]}",
+      "",
+      "**Auth:**",
+      "${6:[authentication method, tokens, API keys]}",
+      "",
+      "**Constraints:**",
+      "${7:[rate limits, versioning, backward compatibility]}"
+    ],
+    "description": "API/integration prompt — explicit contracts"
   }
 }
