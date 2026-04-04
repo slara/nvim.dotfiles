@@ -106,6 +106,11 @@ return {
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
+          -- Remove Neovim 0.12 built-in gr* mappings that overlap with our gr mapping
+          for _, key in ipairs({ 'gra', 'grn', 'grr', 'gri', 'grx', 'grt' }) do
+            pcall(vim.keymap.del, 'n', key, { buffer = event.buf })
+          end
+
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
           map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
           map('gd', function() Snacks.picker.lsp_definitions() end, '[G]oto [D]efinition')
