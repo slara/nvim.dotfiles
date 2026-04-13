@@ -3,12 +3,26 @@ return {
     'folke/snacks.nvim',
     priority = 1000,
     lazy = false,
+    init = function()
+      vim.api.nvim_create_autocmd('ColorScheme', {
+        callback = function()
+          vim.api.nvim_set_hl(0, 'SnacksIndentScope', { fg = '#6a6a6a' })
+        end,
+      })
+      vim.api.nvim_set_hl(0, 'SnacksIndentScope', { fg = '#6a6a6a' })
+    end,
     opts = {
       picker = { enabled = true },
       indent = {
         enabled = true,
         char = '▏',
-        scope = { enabled = true },
+        hl = 'Comment',
+        animate = { enabled = false },
+        scope = {
+          enabled = true,
+          only_current = true,
+          hl = 'SnacksIndentScope',
+        },
       },
       notifier = { enabled = true },
       lazygit = { enabled = true },
