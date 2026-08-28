@@ -17,6 +17,18 @@ return {
       { 'Bilal2453/luvit-meta', lazy = true },
     },
     config = function()
+      local has = function(cmd)
+        return vim.fn.executable(cmd) == 1
+      end
+
+      local ensure_installed = { 'lua_ls' }
+      if has('node') and has('npm') then
+        vim.list_extend(ensure_installed, { 'eslint', 'jsonls', 'ts_ls', 'tailwindcss', 'vue_ls' })
+      end
+      if has('python3') then
+        table.insert(ensure_installed, 'jedi_language_server')
+      end
+
       require('mason').setup({
         ui = {
           border = 'rounded',
@@ -30,13 +42,7 @@ return {
 
       require('mason-lspconfig').setup({
         automatic_enable = false,
-        ensure_installed = {
-          "lua_ls",
-          "eslint",
-          "jsonls",
-          "jedi_language_server",
-          "ts_ls",
-        },
+        ensure_installed = ensure_installed,
       })
 
       -- Get capabilities from blink.cmp
@@ -95,8 +101,24 @@ return {
         capabilities = capabilities,
       })
 
-      -- Enable all configured servers
-      vim.lsp.enable({ 'lua_ls', 'eslint', 'jsonls', 'jedi_language_server', 'ts_ls', 'tailwindcss', 'vue_ls' })
+      local server_commands = {
+        lua_ls = 'lua-language-server',
+        eslint = 'vscode-eslint-language-server',
+        jsonls = 'vscode-json-language-server',
+        jedi_language_server = 'jedi-language-server',
+        ts_ls = 'typescript-language-server',
+        tailwindcss = 'tailwindcss-language-server',
+        vue_ls = 'vue-language-server',
+      }
+
+      local enabled_servers = {}
+      for server, cmd in pairs(server_commands) do
+        if has(cmd) then
+          table.insert(enabled_servers, server)
+        end
+      end
+
+      vim.lsp.enable(enabled_servers)
 
       -- Setup keymaps on LSP attach
       vim.api.nvim_create_autocmd('LspAttach', {
