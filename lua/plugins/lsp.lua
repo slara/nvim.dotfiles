@@ -5,119 +5,110 @@ return {
       'mason-org/mason.nvim',
       'mason-org/mason-lspconfig.nvim',
       { 'j-hui/fidget.nvim', opts = {} },
-      {
-        'folke/lazydev.nvim',
-        ft = 'lua',
-        opts = {
-          library = {
-            { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
-          },
-        },
-      },
     },
     config = function()
       local has = function(cmd)
         return vim.fn.executable(cmd) == 1
       end
 
-      local ensure_installed = { 'lua_ls' }
-      if has('node') and has('npm') then
-        vim.list_extend(ensure_installed, { 'eslint', 'jsonls', 'ts_ls', 'tailwindcss', 'vue_ls' })
-      end
-      if has('python3') then
-        table.insert(ensure_installed, 'jedi_language_server')
-      end
+      -- Vue LS v3 requires ts_ls to load @vue/typescript-plugin and attach to .vue files
+      local vue_language_server_path = vim.fn.stdpath('data')
+        .. '/mason/packages/vue-language-server/node_modules/@vue/language-server'
 
+      -- Single source of truth for language servers:
+      --   bin    executable that must be on PATH for the server to be enabled
+      --   needs  runtimes required before Mason tries to install it
+      --   config passed to vim.lsp.config (merged over nvim-lspconfig defaults)
+      local node = { 'node', 'npm' }
+      local servers = {
+        lua_ls = {
+          bin = 'lua-language-server',
+          config = {
+            settings = {
+              Lua = {
+                workspace = { checkThirdParty = false },
+                telemetry = { enable = false },
+                diagnostics = {
+                  disable = { 'missing-fields' },
+                  globals = { 'vim' },
+                },
+              },
+            },
+          },
+        },
+        eslint = {
+          bin = 'vscode-eslint-language-server',
+          needs = node,
+          config = {
+            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte', 'astro', 'htmlangular' },
+            settings = { workingDirectories = { mode = 'auto' } },
+          },
+        },
+        jsonls = { bin = 'vscode-json-language-server', needs = node },
+        jedi_language_server = { bin = 'jedi-language-server', needs = { 'python3' } },
+        ts_ls = {
+          bin = 'typescript-language-server',
+          needs = node,
+          config = {
+            init_options = {
+              plugins = {
+                {
+                  name = '@vue/typescript-plugin',
+                  location = vue_language_server_path,
+                  languages = { 'vue' },
+                },
+              },
+            },
+            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+          },
+        },
+        tailwindcss = {
+          bin = 'tailwindcss-language-server',
+          needs = node,
+          config = {
+            filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+          },
+        },
+        vue_ls = { bin = 'vue-language-server', needs = node },
+      }
+
+      -- Mason must be set up first: it adds its bin directory to PATH
       require('mason').setup({
         ui = {
           border = 'rounded',
           icons = {
             package_installed = '✓',
             package_pending = '➜',
-            package_uninstalled = '✗'
-          }
-        }
+            package_uninstalled = '✗',
+          },
+        },
       })
+
+      vim.lsp.config('*', { capabilities = require('blink.cmp').get_lsp_capabilities() })
+
+      local ensure_installed, enabled = {}, {}
+      for name, server in pairs(servers) do
+        if vim.iter(server.needs or {}):all(has) then
+          table.insert(ensure_installed, name)
+        end
+        if server.config then
+          vim.lsp.config(name, server.config)
+        end
+        if has(server.bin) then
+          table.insert(enabled, name)
+        end
+      end
 
       require('mason-lspconfig').setup({
         automatic_enable = false,
         ensure_installed = ensure_installed,
       })
+      vim.lsp.enable(enabled)
 
-      -- Get capabilities from blink.cmp
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
-
-      -- Configure LSP servers using native vim.lsp.config
-      vim.lsp.config('lua_ls', {
-        capabilities = capabilities,
-        settings = {
-          Lua = {
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-            diagnostics = {
-              disable = { 'missing-fields' },
-              globals = { 'vim' },
-            },
-          },
-        },
-      })
-
-      vim.lsp.config('eslint', {
-        capabilities = capabilities,
-        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue', 'svelte', 'astro', 'htmlangular' },
-        settings = {
-          workingDirectories = { mode = "auto" }
-        },
-      })
-
-      vim.lsp.config('jsonls', { capabilities = capabilities })
-      vim.lsp.config('jedi_language_server', { capabilities = capabilities })
-
-      -- Vue LS v3 requires ts_ls to load @vue/typescript-plugin and attach to .vue files
-      local vue_language_server_path = vim.fn.stdpath('data')
-        .. '/mason/packages/vue-language-server/node_modules/@vue/language-server'
-
-      vim.lsp.config('ts_ls', {
-        capabilities = capabilities,
-        init_options = {
-          plugins = {
-            {
-              name = '@vue/typescript-plugin',
-              location = vue_language_server_path,
-              languages = { 'vue' },
-            },
-          },
-        },
-        filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
-      })
-
-      vim.lsp.config('tailwindcss', {
-        capabilities = capabilities,
-        filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
-      })
-
-      vim.lsp.config('vue_ls', {
-        capabilities = capabilities,
-      })
-
-      local server_commands = {
-        lua_ls = 'lua-language-server',
-        eslint = 'vscode-eslint-language-server',
-        jsonls = 'vscode-json-language-server',
-        jedi_language_server = 'jedi-language-server',
-        ts_ls = 'typescript-language-server',
-        tailwindcss = 'tailwindcss-language-server',
-        vue_ls = 'vue-language-server',
-      }
-
-      local enabled_servers = {}
-      for server, cmd in pairs(server_commands) do
-        if has(cmd) then
-          table.insert(enabled_servers, server)
-        end
+      -- Remove Neovim's global gr* defaults so `gr` (references) doesn't wait for timeoutlen
+      for _, key in ipairs({ 'gra', 'grn', 'grr', 'gri', 'grx', 'grt' }) do
+        pcall(vim.keymap.del, { 'n', 'x' }, key)
       end
-
-      vim.lsp.enable(enabled_servers)
 
       -- Setup keymaps on LSP attach
       vim.api.nvim_create_autocmd('LspAttach', {
@@ -125,11 +116,6 @@ return {
         callback = function(event)
           local map = function(keys, func, desc)
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-          end
-
-          -- Remove Neovim 0.12 built-in gr* mappings that overlap with our gr mapping
-          for _, key in ipairs({ 'gra', 'grn', 'grr', 'gri', 'grx', 'grt' }) do
-            pcall(vim.keymap.del, 'n', key, { buffer = event.buf })
           end
 
           map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -148,29 +134,19 @@ return {
           map('<leader>wl', function()
             print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
           end, '[W]orkspace [L]ist Folders')
-
-          vim.api.nvim_buf_create_user_command(event.buf, 'Format', function(_)
-            vim.lsp.buf.format()
-          end, { desc = 'Format current buffer with LSP' })
         end,
       })
-
-      -- Setup which-key groups
-      local wk = require('which-key')
-      wk.add({
-        { '<leader>c', group = '[C]ode' },
-        { '<leader>c_', hidden = true },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>d_', hidden = true },
-        { '<leader>h', group = 'More git' },
-        { '<leader>h_', hidden = true },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>r_', hidden = true },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>s_', hidden = true },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>w_', hidden = true },
-      })
     end,
+  },
+
+  -- Lua type definitions for editing this config (also a blink.cmp source)
+  {
+    'folke/lazydev.nvim',
+    ft = 'lua',
+    opts = {
+      library = {
+        { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+      },
+    },
   },
 }

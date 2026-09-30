@@ -2,6 +2,7 @@
 require('config.options')
 require('config.keymaps')
 require('config.autocmds')
+require('config.diagnostics')
 require('config.lazy')
 
 -- The line beneath this is called `modeline`. See `:help modeline`

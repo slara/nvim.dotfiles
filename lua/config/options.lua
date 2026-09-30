@@ -1,25 +1,17 @@
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
--- Set highlight on search
-vim.o.hlsearch = true
+-- Line numbers (absolute on cursor line, relative elsewhere)
+vim.o.number = true
+vim.o.relativenumber = true
 
--- Make line numbers default
-vim.wo.number = true
-
--- Enable mouse mode
+-- Mouse: enable everywhere, focus follows mouse for resizing, right-click extends selection
 vim.o.mouse = 'a'
-
--- Enable mouse focus to allow window resizing with mouse
 vim.o.mousefocus = true
-
--- Better mouse support in terminal
 vim.o.mousemodel = 'extend'
 
--- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.opt.clipboard:append("unnamedplus")
+-- Sync clipboard between OS and Neovim. See `:help 'clipboard'`
+vim.o.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.o.breakindent = true
@@ -32,7 +24,7 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
+vim.o.signcolumn = 'yes'
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -50,14 +42,8 @@ vim.g.falcon_inactive = 0
 vim.o.splitright = true
 vim.o.splitbelow = true
 
--- Relative line numbers
-vim.o.relativenumber = true
-
 -- Don't show mode in cmdline (lualine shows it)
-vim.opt.showmode = false
-
--- Incremental search
-vim.o.incsearch = true
+vim.o.showmode = false
 
 -- Keep lines visible above/below cursor
-vim.opt.scrolloff = 8
+vim.o.scrolloff = 8

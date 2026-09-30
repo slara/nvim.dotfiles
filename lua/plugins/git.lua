@@ -1,11 +1,12 @@
 return {
   -- Git related plugins
-  'tpope/vim-fugitive',
-  'tpope/vim-rhubarb',
+  { 'tpope/vim-fugitive', cmd = { 'G', 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'GBrowse' } },
+  { 'tpope/vim-rhubarb', dependencies = { 'tpope/vim-fugitive' }, cmd = 'GBrowse' },
 
   -- Gitsigns
   {
     'lewis6991/gitsigns.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
     opts = {
       signs = {
         add = { text = '+' },

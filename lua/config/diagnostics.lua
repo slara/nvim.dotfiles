@@ -1,7 +1,7 @@
--- Configure diagnostics with virtual text
+-- [[ Diagnostics ]]
+-- Virtual text, signs and floats. See `:help vim.diagnostic.config()`
 vim.diagnostic.config({
   virtual_text = {
-    enabled = true,
     source = "if_many",  -- Show source if multiple sources
     spacing = 4,         -- Spacing between text and virtual text
     prefix = "●",        -- Prefix for virtual text
@@ -29,14 +29,21 @@ vim.diagnostic.config({
     focusable = false,
     style = "minimal",
     border = "rounded",
-    source = "always",
+    source = true,
     header = "",
     prefix = "",
   },
 })
 
--- Optional: Configure diagnostic highlight colors (add this if you want custom colors)
-vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#ff6c6b", italic = true })
-vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ECBE7B", italic = true })
-vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#51afef", italic = true })
-vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#98be65", italic = true })
+-- Diagnostic virtual text colors, reapplied when the colorscheme changes
+local function set_diagnostic_hl()
+  vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError", { fg = "#ff6c6b", italic = true })
+  vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn", { fg = "#ECBE7B", italic = true })
+  vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo", { fg = "#51afef", italic = true })
+  vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint", { fg = "#98be65", italic = true })
+end
+set_diagnostic_hl()
+vim.api.nvim_create_autocmd("ColorScheme", {
+  group = vim.api.nvim_create_augroup("DiagnosticHighlights", { clear = true }),
+  callback = set_diagnostic_hl,
+})
