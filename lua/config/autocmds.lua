@@ -3,8 +3,12 @@ local lcd_group = vim.api.nvim_create_augroup('AutoLcd', { clear = true })
 vim.api.nvim_create_autocmd('BufEnter', {
   group = lcd_group,
   callback = function()
-    if vim.bo.buftype == '' then
-      vim.cmd('lcd %:p:h')
+    if vim.bo.buftype ~= '' then
+      return
+    end
+    local dir = vim.fn.expand('%:p:h')
+    if vim.fn.isdirectory(dir) == 1 then
+      vim.cmd.lcd(vim.fn.fnameescape(dir))
     end
   end,
 })
@@ -18,4 +22,13 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
   group = highlight_group,
   pattern = '*',
+})
+
+-- [[ Treesitter highlighting ]]
+-- nvim-treesitter's main branch no longer enables highlighting; start it for any filetype with a parser
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('TreesitterStart', { clear = true }),
+  callback = function(args)
+    pcall(vim.treesitter.start, args.buf)
+  end,
 })

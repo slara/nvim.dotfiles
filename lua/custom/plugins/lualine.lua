@@ -1,10 +1,3 @@
-local function repo()
-  local f = io.popen("basename `git rev-parse --show-toplevel` 2>&1")
-  local s = assert(f:read('*a'))
-  f:close()
-  return s:match"^%s*(.*)":match"(.-)%s*$"
-end
-
 return { -- Set lualine as statusline
   'nvim-lualine/lualine.nvim',
   -- See `:help lualine.txt`

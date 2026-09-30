@@ -1,3 +1,3 @@
 return {
-  { 'echasnovski/mini.icons', version = false },
+  { 'nvim-mini/mini.icons', version = false },
 }

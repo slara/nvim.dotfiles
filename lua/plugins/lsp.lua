@@ -3,18 +3,17 @@ return {
     'neovim/nvim-lspconfig',
     dependencies = {
       'mason-org/mason.nvim',
-      'williamboman/mason-lspconfig.nvim',
+      'mason-org/mason-lspconfig.nvim',
       { 'j-hui/fidget.nvim', opts = {} },
       {
         'folke/lazydev.nvim',
         ft = 'lua',
         opts = {
           library = {
-            { path = 'luvit-meta/library', words = { 'vim%.uv' } },
+            { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
           },
         },
       },
-      { 'Bilal2453/luvit-meta', lazy = true },
     },
     config = function()
       require('mason').setup({
@@ -141,8 +140,6 @@ return {
         { '<leader>c_', hidden = true },
         { '<leader>d', group = '[D]ocument' },
         { '<leader>d_', hidden = true },
-        { '<leader>g', group = '[G]it' },
-        { '<leader>g_', hidden = true },
         { '<leader>h', group = 'More git' },
         { '<leader>h_', hidden = true },
         { '<leader>r', group = '[R]ename' },

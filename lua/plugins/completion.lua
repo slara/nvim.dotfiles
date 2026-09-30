@@ -14,7 +14,6 @@ return {
           require('luasnip.loaders.from_vscode').lazy_load({ paths = { vim.fn.stdpath('config') .. '/snippets' } })
         end,
       },
-      { 'fang2hou/blink-copilot' },
       { 'folke/lazydev.nvim', ft = 'lua' },
     },
     opts = {
@@ -46,18 +45,12 @@ return {
       },
       snippets = { preset = 'luasnip' },
       sources = {
-        default = { 'lazydev', 'copilot', 'lsp', 'path', 'snippets', 'buffer' },
+        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
         providers = {
           lazydev = {
             name = 'LazyDev',
             module = 'lazydev.integrations.blink',
             score_offset = 100,
-          },
-          copilot = {
-            name = 'Copilot',
-            module = 'blink-copilot',
-            score_offset = 50,
-            async = true,
           },
         },
       },

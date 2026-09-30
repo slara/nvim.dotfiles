@@ -24,9 +24,6 @@ return {
           hl = 'SnacksIndentScope',
         },
       },
-      notifier = { enabled = true },
-      lazygit = { enabled = true },
-      explorer = { enabled = true },
     },
     keys = {
       -- File pickers
@@ -42,12 +39,6 @@ return {
       { '<leader>/', function() Snacks.picker.lines() end, desc = '[/] Search in current buffer' },
       { '<C-p>', function() Snacks.picker.git_files() end, desc = 'Find files in git repo' },
       { '<C-g>', function() Snacks.picker.projects() end, desc = 'Find project repositories' },
-
-      -- Git
-      { '<leader>gg', function() Snacks.lazygit() end, desc = 'Lazygit' },
-
-      -- Explorer
-      { '<leader>fe', function() Snacks.explorer() end, desc = '[F]ile [E]xplorer' },
     },
   },
 }
