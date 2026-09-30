@@ -10,8 +10,9 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require('nvim-treesitter').install({
-        'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript',
-        'typescript', 'vimdoc', 'vim', 'bash', 'json',
+        'bash', 'c', 'cpp', 'css', 'go', 'html', 'javascript', 'json',
+        'latex', 'lua', 'python', 'regex', 'rust', 'scss', 'svelte',
+        'tsx', 'typescript', 'typst', 'vim', 'vimdoc', 'vue',
       })
 
       require('treesitter-context').setup({

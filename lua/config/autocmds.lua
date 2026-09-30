@@ -6,9 +6,15 @@ vim.api.nvim_create_autocmd('BufEnter', {
     if vim.bo.buftype ~= '' then
       return
     end
-    local dir = vim.fn.expand('%:p:h')
-    if vim.fn.isdirectory(dir) == 1 then
-      vim.cmd.lcd(vim.fn.fnameescape(dir))
+
+    local name = vim.api.nvim_buf_get_name(0)
+    if name == '' or name:match('^%w[%w+.-]*://') then
+      return
+    end
+
+    local dir = vim.fn.isdirectory(name) == 1 and name or vim.fn.fnamemodify(name, ':p:h')
+    if dir ~= '' and vim.fn.isdirectory(dir) == 1 then
+      vim.cmd('lcd ' .. vim.fn.fnameescape(dir))
     end
   end,
 })

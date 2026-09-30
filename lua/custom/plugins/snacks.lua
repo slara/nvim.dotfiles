@@ -12,7 +12,10 @@ return {
       vim.api.nvim_set_hl(0, 'SnacksIndentScope', { fg = '#6a6a6a' })
     end,
     opts = {
-      picker = { enabled = true },
+      picker = {
+        enabled = true,
+        ui_select = true,
+      },
       indent = {
         enabled = true,
         char = '▏',
@@ -24,7 +27,12 @@ return {
           hl = 'SnacksIndentScope',
         },
       },
+      image = { enabled = false },
     },
+    config = function(_, opts)
+      require('snacks').setup(opts)
+      require('snacks.picker').setup()
+    end,
     keys = {
       -- File pickers
       { '<leader>sf', function() Snacks.picker.files() end, desc = '[S]earch [F]iles' },
